@@ -1,0 +1,53 @@
+﻿@model IEnumerable<TutumAdminAPI.Models.Course>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Список курсов</h1>
+
+<p>
+    <a asp-action="Create">Создать новый курс</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PreviewPath)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsPremiumOnly)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                <img src="https://tutumstorage.blob.core.windows.net/images/@Html.DisplayFor(modelItem => item.PreviewPath)">
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsPremiumOnly)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CourseId">Изменить</a> |
+                <a asp-action="Delete" asp-route-id="@item.CourseId">Удалить</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
