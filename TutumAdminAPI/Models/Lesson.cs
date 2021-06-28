@@ -11,6 +11,8 @@ namespace TutumAdminAPI.Models
     public partial class Lesson
     {
         public int LessonId { get; set; }
+
+        [Display(Name = "Курс")]
         public int CourseId { get; set; }
 
         [Required]
@@ -23,13 +25,11 @@ namespace TutumAdminAPI.Models
         [MaxLength(1000)]
         public string Text { get; set; }
 
-        [Required]
-        [Display(Name = "Видео файл")]
-        [MaxLength(50)]
         public string VideoPath { get; set; }
 
         public string PreviewPath { get; set; }
 
+        [Display(Name = "Курс")]
         [JsonIgnore]
         public virtual Course Course { get; set; }
 
@@ -40,5 +40,10 @@ namespace TutumAdminAPI.Models
         [JsonIgnore]
         [NotMapped]
         public bool ShowAllData = false;
+
+        [Required]
+        [Display(Name = "Видео файл")]
+        [NotMapped]
+        public string VideoFileName { get; set; }
     }
 }

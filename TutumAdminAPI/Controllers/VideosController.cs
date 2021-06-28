@@ -22,15 +22,18 @@ namespace TutumAdminAPI.Controllers
     {
         private readonly ConfigWrapper _config;
         private readonly IConfiguration _configuration;
+        private readonly VideoFileHelpers _helper;
+
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
         private readonly long _fileSizeLimit = 100000000000;
         private string fileName;
         private string extension;
 
-        public VideosController(ConfigWrapper config, IConfiguration configuration)
+        public VideosController(ConfigWrapper config, IConfiguration configuration, VideoFileHelpers helper)
         {
             _config = config;
             _configuration = configuration;
+            _helper = helper;
         }
 
         // GET: AdminVideos
@@ -42,48 +45,10 @@ namespace TutumAdminAPI.Controllers
             var videoVMs = new List<VideoViewModel>();
             foreach (var sLocator in sLocators)
             {
-                videoVMs.Add(await ModelFromLocatorAsync(sLocator, client));
+                videoVMs.Add(await _helper.ModelFromLocatorAsync(sLocator, client));
             }
 
             return View(videoVMs);
-        }
-
-        private async Task<VideoViewModel> ModelFromLocatorAsync(StreamingLocator input, IAzureMediaServicesClient _client)
-        {
-            var paths = await _client.StreamingLocators.ListPathsAsync(_config.ResourceGroup, _config.AccountName, input.Name);
-            return ModelFromLocatorAsync(paths, input.AssetName);
-        }
-
-        private async Task<VideoViewModel> ModelFromLocatorAsync(AssetStreamingLocator input, IAzureMediaServicesClient _client)
-        {
-            var paths = await _client.StreamingLocators.ListPathsAsync(_config.ResourceGroup, _config.AccountName, input.Name);
-            return ModelFromLocatorAsync(paths, input.AssetName);
-        }
-
-        private VideoViewModel ModelFromLocatorAsync(ListPathsResponse paths, string assetName)
-        {
-            var newVM = new VideoViewModel
-            {
-                FileName = assetName,
-                PreviewPath = paths.DownloadPaths.FirstOrDefault(path => path.EndsWith(".jpg")),
-                VideoPath = paths.DownloadPaths.FirstOrDefault(path => path.EndsWith(".mp4"))
-            };
-            return newVM;
-        }
-
-        private async Task<VideoViewModel> ModelFromAssetName(string assetName)
-        {
-            var client = await AzureHelper.CreateMediaServicesClientAsync(_config);
-            var result = await client.Assets.ListStreamingLocatorsAsync(_config.ResourceGroup, _config.AccountName, assetName);
-
-            if (!result.StreamingLocators.Any())
-            {
-                return null;
-            }
-
-            var sLocator = result.StreamingLocators.First();
-            var videoViewModel = await ModelFromLocatorAsync(sLocator, client);
-            return videoViewModel;
         }
 
         // GET: AdminVideos/Details/5
@@ -94,7 +59,7 @@ namespace TutumAdminAPI.Controllers
                 return NotFound(); 
             }
 
-            var videoViewModel = await ModelFromAssetName(id);
+            var videoViewModel = await _helper.ModelFromAssetName(id);
 
             if (videoViewModel == null) 
             {
@@ -114,7 +79,7 @@ namespace TutumAdminAPI.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [DisableRequestSizeLimit]
+        [RequestSizeLimit(100_000_000)]
         public async Task<IActionResult> CreateBigFile()
         {
             //Какая-то проверка
@@ -195,7 +160,7 @@ namespace TutumAdminAPI.Controllers
                 return NotFound();
             }
 
-            var videoViewModel = await ModelFromAssetName(id);
+            var videoViewModel = await _helper.ModelFromAssetName(id);
 
             if (videoViewModel == null)
             {
@@ -203,42 +168,6 @@ namespace TutumAdminAPI.Controllers
             }
 
             return View(videoViewModel);
-        }
-
-        // POST: AdminVideos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PrimaryKey,FileName,PreviewPath,VideoPath")] VideoViewModel videoViewModel)
-        {
-            //if (id != videoViewModel.PrimaryKey)
-            //{
-            //    return NotFound();
-            //}
-
-            //if (ModelState.IsValid)
-            //{
-            //    try
-            //    {
-            //        _context.Update(videoViewModel);
-            //        await _context.SaveChangesAsync();
-            //    }
-            //    catch (DbUpdateConcurrencyException)
-            //    {
-            //        if (!VideoViewModelExists(videoViewModel.PrimaryKey))
-            //        {
-            //            return NotFound();
-            //        }
-            //        else
-            //        {
-            //            throw;
-            //        }
-            //    }
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //return View(videoViewModel);
-            return NotFound();
         }
 
         // GET: AdminVideos/Delete/5
@@ -249,7 +178,7 @@ namespace TutumAdminAPI.Controllers
                 return NotFound();
             }
 
-            var videoViewModel = await ModelFromAssetName(id);
+            var videoViewModel = await _helper.ModelFromAssetName(id);
 
             if (videoViewModel == null)
             {

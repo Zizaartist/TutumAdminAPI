@@ -5,11 +5,12 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Список уроков</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Создать новый урок</a>
 </p>
+@*<select asp-action="Edit" asp-route-id="@item.LessonId" class ="form-control" asp-items="ViewBag.Courses"></select>*@
 <table class="table">
     <thead>
         <tr>
@@ -20,10 +21,7 @@
                 @Html.DisplayNameFor(model => model.Text)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.VideoPath)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PreviewPath)
+                @Html.DisplayNameFor(model => model.VideoFileName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Course)
@@ -41,18 +39,15 @@
                 @Html.DisplayFor(modelItem => item.Text)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.VideoPath)
+                <img src="https://tutumvideoservices-jpwe.streaming.media.azure.net/@Html.DisplayFor(modelItem => item.PreviewPath)">
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PreviewPath)
+                @Html.DisplayFor(modelItem => item.Course.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Course.Description)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.LessonId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.LessonId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.LessonId">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.LessonId">Изменить</a> |
+                <a asp-action="Details" asp-route-id="@item.LessonId">Просмотр</a> |
+                <a asp-action="Delete" asp-route-id="@item.LessonId">Удалить</a>
             </td>
         </tr>
 }

@@ -50,7 +50,7 @@ namespace TutumAdminAPI
 
                 entity.Property(e => e.PreviewPath)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(100);
 
                 entity.Property(e => e.Text)
                     .IsRequired()
@@ -62,7 +62,7 @@ namespace TutumAdminAPI
 
                 entity.Property(e => e.VideoPath)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(100);
 
                 entity.HasOne(d => d.Course)
                     .WithMany(p => p.Lessons)

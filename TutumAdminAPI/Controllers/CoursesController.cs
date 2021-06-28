@@ -110,7 +110,7 @@ namespace TutumAdminAPI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CourseId,Title,Description,PreviewFile,IsPremiumOnly")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("CourseId,Title,Description,PreviewFile,PreviewPath,IsPremiumOnly")] Course course)
         {
             if (id != course.CourseId)
             {

@@ -21,33 +21,6 @@ namespace TutumAdminAPI.Controllers
             _config = config;
         }
 
-        //AdminAuth
-        [HttpPost]
-        public ActionResult<string> GetAdminToken(AdminLoginModel loginModel)
-        {
-            var correctLogin = _config["Jwt:Login"];
-            var correctPassword = _config["Jwt:Password"];
-
-            var inputLogin = loginModel.Login;
-            var inputPassword = loginModel.Password;
-
-            if (correctLogin != inputLogin || correctPassword != inputPassword)
-            {
-                return Forbid();
-            }
-
-            var identity = GetIdentity();
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-
-            var jwt = new JwtSecurityToken(
-                    claims: identity.Claims,
-                    expires: DateTime.Now.AddYears(1),
-                    signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            return Json(new { AccessToken = encodedJwt });
-        }
-
         private ClaimsIdentity GetIdentity()
         {
             var claims = new List<Claim>

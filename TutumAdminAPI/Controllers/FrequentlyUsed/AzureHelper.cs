@@ -174,7 +174,7 @@ namespace TutumAdminAPI.Controllers.FrequentlyUsed
             string resourceGroupName,
             string accountName)
         {
-            var sLocators = await client.StreamingLocators.ListAsync(resourceGroupName, accountName, new ODataQuery<StreamingLocator>(sl => true));
+            var sLocators = await client.StreamingLocators.ListAsync(resourceGroupName, accountName);
             return sLocators;
         }
 

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Hosting;
 using TutumAdminAPI.Controllers.FrequentlyUsed;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace TutumAdminAPI
 {
@@ -28,11 +29,13 @@ namespace TutumAdminAPI
                 {
                     options.AccessDeniedPath = "/Auth/AccessDenied";
                     options.LoginPath = "/Auth/LoginForm";
+                    options.ExpireTimeSpan = TimeSpan.FromHours(4);
                 });
 
             services.AddControllersWithViews();
 
-            services.AddScoped<ConfigWrapper>(); 
+            services.AddScoped<ConfigWrapper>();
+            services.AddScoped<VideoFileHelpers>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

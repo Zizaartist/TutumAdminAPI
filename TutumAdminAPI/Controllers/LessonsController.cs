@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TutumAdminAPI.Controllers.FrequentlyUsed;
@@ -16,12 +17,14 @@ namespace TutumAdminAPI.Controllers
         private readonly DatabaseContext _context;
         private readonly ConfigWrapper _config;
         private readonly IConfiguration _configuration;
+        private readonly VideoFileHelpers _helper;
 
-        public LessonsController(DatabaseContext context, ConfigWrapper config, IConfiguration configuration)
+        public LessonsController(DatabaseContext context, ConfigWrapper config, IConfiguration configuration, VideoFileHelpers helper)
         {
             _context = context;
             _config = config;
             _configuration = configuration;
+            _helper = helper;
         }
 
         // GET: Lessons
@@ -51,10 +54,28 @@ namespace TutumAdminAPI.Controllers
         }
 
         // GET: Lessons/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Description");
+            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Title");
+
+            var vids = await GetVideoCollection();
+
+            ViewData["VideoFile"] = new SelectList(vids, "FileName", "FileName");
+
             return View();
+        }
+
+        private async Task<IEnumerable<VideoViewModel>> GetVideoCollection()
+        {
+            var client = await AzureHelper.CreateMediaServicesClientAsync(_config);
+            var sLocators = await AzureHelper.ListAllAssets(client, _config.ResourceGroup, _config.AccountName);
+
+            var videoVMs = new List<VideoViewModel>();
+            foreach (var sLocator in sLocators)
+            {
+                videoVMs.Add(await _helper.ModelFromLocatorAsync(sLocator, client));
+            }
+            return videoVMs;
         }
 
         // POST: Lessons/Create
@@ -62,15 +83,25 @@ namespace TutumAdminAPI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LessonId,CourseId,Title,Text,VideoPath,PreviewPath")] Lesson lesson)
+        public async Task<IActionResult> Create([Bind("LessonId,CourseId,Title,Text,VideoFileName")] Lesson lesson)
         {
             if (ModelState.IsValid)
             {
+                var client = await AzureHelper.CreateMediaServicesClientAsync(_config);
+                var videoVM = await _helper.ModelFromAssetName(lesson.VideoFileName);
+
+                lesson.PreviewPath = videoVM.PreviewPath;
+                lesson.VideoPath = videoVM.VideoPath;
+
                 _context.Add(lesson);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Description", lesson.CourseId);
+            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Title", lesson.CourseId);
+
+            var vids = await GetVideoCollection();
+
+            ViewData["VideoFile"] = new SelectList(vids, "FileName", "FileName", lesson.VideoFileName);
             return View(lesson);
         }
 
@@ -87,7 +118,16 @@ namespace TutumAdminAPI.Controllers
             {
                 return NotFound();
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Description", lesson.CourseId);
+
+            ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Title");
+
+            var vids = await GetVideoCollection();
+
+            ViewData["VideoFile"] = new SelectList(vids, "FileName", "FileName");
+
+            //Выбираем имя того файла, у которого тот же путь
+            lesson.VideoFileName = vids.FirstOrDefault(vid => vid.VideoPath == lesson.VideoPath).FileName;
+
             return View(lesson);
         }
 
@@ -96,7 +136,7 @@ namespace TutumAdminAPI.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LessonId,CourseId,Title,Text,VideoPath,PreviewPath")] Lesson lesson)
+        public async Task<IActionResult> Edit(int id, [Bind("LessonId,CourseId,Title,Text,VideoPath,PreviewPath,VideoFileName")] Lesson lesson)
         {
             if (id != lesson.LessonId)
             {
@@ -107,6 +147,12 @@ namespace TutumAdminAPI.Controllers
             {
                 try
                 {
+                    var client = await AzureHelper.CreateMediaServicesClientAsync(_config);
+                    var videoVM = await _helper.ModelFromAssetName(lesson.VideoFileName);
+
+                    lesson.PreviewPath = videoVM.PreviewPath;
+                    lesson.VideoPath = videoVM.VideoPath;
+
                     _context.Update(lesson);
                     await _context.SaveChangesAsync();
                 }
@@ -123,7 +169,11 @@ namespace TutumAdminAPI.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CourseId"] = new SelectList(_context.Courses, "CourseId", "Description", lesson.CourseId);
+            var vids = await GetVideoCollection();
+            ViewData["VideoFile"] = new SelectList(vids, "FileName", "FileName");
+
             return View(lesson);
         }
 
