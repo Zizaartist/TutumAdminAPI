@@ -40,6 +40,7 @@
                     $.ajax({
                         xhr: function() {
                             var xhr = new window.XMLHttpRequest();
+                            xhr.withCredentials = true;
                             xhr.upload.addEventListener("progress", function(evt) {
                                 if (evt.lengthComputable) {
                                     var percentComplete = (evt.loaded / evt.total) * 100;
@@ -50,7 +51,7 @@
                             return xhr;
                         },
                         type: "POST",
-                        url: '@Url.Action("CreateBigFile", "AdminVideos")',
+                        url: '@Url.Action("CreateBigFile", "Videos")',
                         contentType: false,
                         processData: false,
                         data: data,

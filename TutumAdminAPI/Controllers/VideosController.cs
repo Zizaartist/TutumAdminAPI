@@ -36,7 +36,7 @@ namespace TutumAdminAPI.Controllers
             _helper = helper;
         }
 
-        // GET: AdminVideos
+        // GET: Videos
         public async Task<IActionResult> Index()
         {
             var client = await AzureHelper.CreateMediaServicesClientAsync(_config);
@@ -51,7 +51,7 @@ namespace TutumAdminAPI.Controllers
             return View(videoVMs);
         }
 
-        // GET: AdminVideos/Details/5
+        // GET: Videos/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -69,17 +69,17 @@ namespace TutumAdminAPI.Controllers
             return View(videoViewModel);
         }
 
-        // GET: AdminVideos/Create
+        // GET: Videos/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: AdminVideos/Create
+        // POST: Videos/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [RequestSizeLimit(100_000_000)]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> CreateBigFile()
         {
             //Какая-то проверка
@@ -152,7 +152,7 @@ namespace TutumAdminAPI.Controllers
             return Ok();
         }
 
-        // GET: AdminVideos/Edit/5
+        // GET: Videos/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -170,7 +170,7 @@ namespace TutumAdminAPI.Controllers
             return View(videoViewModel);
         }
 
-        // GET: AdminVideos/Delete/5
+        // GET: Videos/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -188,7 +188,7 @@ namespace TutumAdminAPI.Controllers
             return View(videoViewModel);
         }
 
-        // POST: AdminVideos/Delete/5
+        // POST: Videos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
