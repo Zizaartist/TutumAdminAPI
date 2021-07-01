@@ -17,6 +17,7 @@ namespace TutumAdminAPI.Models
         [JsonIgnore]
         public virtual Subscription Subscription { get; set; }
 
+        [Display(Name = "Имеется подписка")]
         [NotMapped]
         public bool HasSubscription { get => Subscription != null; }
     }

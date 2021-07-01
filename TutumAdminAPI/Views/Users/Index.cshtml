@@ -1,0 +1,70 @@
+﻿@model IEnumerable<TutumAdminAPI.Models.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+ 
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HasSubscription)
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                <input id="checkbox-@item.UserId" type="checkbox" checked="@item.HasSubscription" disabled>
+                <button onclick="SendReq(@item.UserId);">Создать/удалить подписку</button>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+
+        function gettoken() {
+            var token = '@Html.AntiForgeryToken()';
+            token = $(token).val();
+            return token;
+       }
+
+        function SendReq(id){
+            $.ajax({
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    return xhr;
+                },
+                type: "POST",
+                url: '@Url.Action("ToggleSubscription", "Users")' + '?id=' + id,
+                data: { 
+                    __RequestVerificationToken: gettoken()
+                },
+                success: function (result) {
+                    var checkbox = document.getElementById("checkbox-" + id);
+                    checkbox.checked = !checkbox.checked;
+                    alert(checkbox.checked);
+                },
+                error: function (xhr, status, p3) {
+                    alert("Произошла ошибка при отправке: "+xhr.responseText);
+                }
+            });
+        }
+    </script>
+}
